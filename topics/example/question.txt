@@ -1,0 +1,7 @@
+Persona / context: A policy analyst evaluating grid-scale energy storage options.
+
+Research the following questions and produce a sourced report:
+
+1. [Storage] What are the most cost-effective grid-scale energy storage technologies as of recent data?
+2. [Storage] What round-trip efficiency do lithium-ion grid batteries achieve in practice?
+3. [Integration] What share of variable renewables can a grid absorb before storage becomes the binding constraint?

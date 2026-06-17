@@ -1,0 +1,8 @@
+# Universal public-leak patterns (regex, case-insensitive). Repo-specific
+# owner tokens live in tests/denylist.private.txt (gitignored).
+/Users/[A-Za-z0-9._-]+
+/home/[A-Za-z0-9._-]+
+[A-Za-z0-9._%+-]+@(gmail|yahoo|outlook|proton(mail)?|hotmail)\.[a-z]+
+\bthe owner\b
+used to be
+previously hardcoded
