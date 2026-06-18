@@ -63,6 +63,78 @@ def validate_verdicts(topic):
     return len(files)
 
 
+_CLAIM_ID_RE = re.compile(r"^c\d")
+
+
+def validate_atoms(topic, engine=None):
+    """Atoms contract (output of atomize.js): claims[] non-empty, ids like c1/c2, text non-empty.
+
+    engine=None -> checks all atoms/*.json of the topic. Returns {engine: claim count}.
+    Catches: empty atomization, garbage ids (mangled passing), a claim with no text."""
+    adir = P.atoms_dir(topic)
+    files = [P.atoms(topic, engine)] if engine else sorted(adir.glob("*.json"))
+    if not files or (engine and not files[0].exists()):
+        raise StageError(f"no atoms in topics/{topic}/atoms/ — run atomize.js first")
+    out = {}
+    for f in files:
+        d = _load(f)
+        claims = d.get("claims")
+        if not isinstance(claims, list) or not claims:
+            raise StageError(f"atoms/{f.name}: empty/missing claims[]")
+        for c in claims:
+            cid = c.get("id")
+            if not isinstance(cid, str) or not _CLAIM_ID_RE.match(cid):
+                raise StageError(f"atoms/{f.name}: id «{cid}» not like c1/c2 (mangled atomization)")
+            if not (c.get("text") or "").strip():
+                raise StageError(f"atoms/{f.name}: claim {cid} has no text")
+        out[f.stem] = len(claims)
+    return out
+
+
+def validate_selection(topic):
+    """Selection contract (Opus output, stage 3b): every facts.json qid is covered in selection.
+
+    selection.questions[qid].ranked — a non-empty list of 'engine:cN'. Catches a missing
+    sub-question (topic silently not covered) and a malformed rank shape."""
+    sel = _load(P.selection(topic))
+    _need_keys(sel, ["questions"], f"topics/{topic}/selection.json")
+    fdoc = _load(P.facts(topic))
+    qids = [q.get("id") for q in fdoc.get("questions", []) if q.get("id")]
+    if not qids:
+        raise StageError(f"facts.json of topic {topic}: no questions with id (stage 1 not done)")
+    sel_q = sel["questions"]
+    missing = [q for q in qids if q not in sel_q]
+    if missing:
+        raise StageError(f"selection.json: sub-questions not covered {missing} (selection incomplete)")
+    for qid in qids:
+        ranked = sel_q[qid].get("ranked")
+        if not isinstance(ranked, list) or not ranked:
+            raise StageError(f"selection.json: question {qid} has empty ranked[]")
+        bad = [r for r in ranked if not (isinstance(r, str) and ":" in r and _CLAIM_ID_RE.search(r.split(':', 1)[1]))]
+        if bad:
+            raise StageError(f"selection.json: question {qid} — rank not like 'engine:cN': {bad[:3]}")
+    return {"questions": len(qids)}
+
+
+def verdict_quote_offenders(topic):
+    """Confirmed verdicts (SUPPORTED/PARTIAL) without a verbatim quote.
+
+    Per the extension contract, quote is MANDATORY for SUPPORTED/PARTIAL. This is NOT a
+    safety gate (gate.py holds that — the text->source anchor), but a presentation-completeness
+    check: without quote the fact card can't show "what the source says". Soft — old topics
+    (the field was added later) must not break a re-render.
+    Returns a list of offenders [{engine, id, label}]."""
+    out = []
+    d = P.verdicts_dir(topic)
+    for f in d.glob("*.json"):
+        if f.stem.endswith("-core"):
+            continue
+        for c in _load(f).get("claims", []):
+            if c.get("label") in CONFIRMED and not (c.get("quote") or "").strip():
+                out.append({"engine": f.stem, "id": c.get("id"), "label": c.get("label")})
+    return out
+
+
 def validate_raw(topic):
     """Output of build_pool: confirmed/unconfirmed — lists of records in the required shape."""
     raw = _load(P.pool_raw(topic))

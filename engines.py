@@ -6,11 +6,24 @@ import os, sys, json, time, urllib.request, urllib.error, concurrent.futures, pa
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent / "funnel"))
 import paths as P
 
+MIN_REPORT_CHARS = 200  # shorter = truncated/empty engine report (not a source of atoms)
+
 PRICES = {  # $ per 1M tokens (approximate, mid-2026)
     "gemini-2.5-pro":      {"in": 1.25, "out": 10.0},
     "o4-mini-deep-research": {"in": 2.0, "out": 8.0},
     "sonar-pro":           {"in": 3.0, "out": 15.0, "search_per_k": 5.0},
     "sonar-deep-research": {"in": 2.0, "out": 8.0, "search_per_k": 5.0},
+}
+
+# Which env key each engine needs (source of truth for preflight_engines.py).
+# claude_deepresearch runs through a Workflow and needs no env key.
+ENGINE_ENV = {
+    "gemini":           "GEMINI_API_KEY",
+    "perplexity_sonar": "PERPLEXITY_API_KEY",
+    "perplexity_deep":  "PERPLEXITY_API_KEY",
+    "openai_deep":      "OPENAI_API_KEY",
+    "exa_answer":       "EXA_API_KEY",
+    "exa_research":     "EXA_API_KEY",
 }
 
 def _post(url, body, headers, timeout=600):
@@ -59,13 +72,19 @@ def run_openai_dr(q):
     t = time.time()
     launch = _post("https://api.openai.com/v1/responses",
         {"model":"o4-mini-deep-research-2025-06-26","input":q,"tools":[{"type":"web_search_preview"}],"background":True}, h)
+    if not isinstance(launch, dict) or not launch.get("id"):
+        return {"error":"launch without id: "+str(launch)[:200],"seconds":round(time.time()-t,1)}
     rid = launch["id"]
+    r = {}
     while True:
         time.sleep(8)
-        r = _get(f"https://api.openai.com/v1/responses/{rid}", h)
+        r = _get(f"https://api.openai.com/v1/responses/{rid}", h) or {}
         if r.get("status") in ("completed","failed","incomplete","cancelled"): break
         if time.time()-t > 600: return {"error":"timeout 10min","seconds":round(time.time()-t,1)}
     sec = time.time()-t
+    # A non-completed status must NOT leak as "success" with an empty report.
+    if r.get("status") != "completed":
+        return {"error":"status "+str(r.get("status")),"seconds":round(sec,1)}
     text, srcs = "", set()
     for it in r.get("output",[]):
         if it.get("type")=="message":
@@ -102,10 +121,13 @@ def run_exa_research(q, model="exa-research"):
     h = {"x-api-key":key,"Content-Type":"application/json"}
     t = time.time()
     launch = _post("https://api.exa.ai/research/v1", {"model":model,"instructions":q}, h, timeout=60)
+    if not isinstance(launch, dict) or not launch.get("researchId"):
+        return {"error":"launch without researchId: "+str(launch)[:200],"seconds":round(time.time()-t,1)}
     rid = launch["researchId"]
+    r = {}
     while True:
         time.sleep(8)
-        r = _get(f"https://api.exa.ai/research/v1/{rid}", h)
+        r = _get(f"https://api.exa.ai/research/v1/{rid}", h) or {}
         if r.get("status") in ("completed","failed","canceled"): break
         if time.time()-t > 600: return {"error":"timeout 10min","seconds":round(time.time()-t,1)}
     sec = time.time()-t
@@ -125,31 +147,88 @@ ENGINES = {
     "exa_research":  lambda q: run_exa_research(q),
 }
 
+def _atomic_write(path, text):
+    """temp->rename: a re-run that times out can't partially clobber an already-good file.
+
+    Write to .tmp, then os.replace (atomic within a filesystem). If the process dies
+    mid-write, the previous valid file stays in place rather than a truncated one."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
 def main():
-    topic = sys.argv[1] if len(sys.argv)>1 else "topic1"
-    qfile = sys.argv[2]
-    only = sys.argv[3].split(",") if len(sys.argv)>3 else None
+    argv = sys.argv[1:]
+    pos = [a for a in argv if not a.startswith("-")]
+    flags = [a for a in argv if a.startswith("-")]
+    topic = pos[0] if pos else "topic1"
+    qfile = pos[1] if len(pos) > 1 else None
+    only = pos[2].split(",") if len(pos) > 2 else None
+    skip_ok = "--skip-ok" in flags
+    force = "--force" in flags
+    min_ok = 1
+    for f in flags:
+        if f.startswith("--min-ok="):
+            min_ok = int(f.split("=", 1)[1])
+    if not qfile:
+        print("usage: engines.py <topic> <question_file> [eng1,eng2] [--skip-ok] [--force] [--min-ok=N]",
+              file=sys.stderr)
+        sys.exit(64)
+
+    # selected engines actually exist (a typo in the list -> clear error, not an empty executor)
+    if only:
+        bad = [e for e in only if e not in ENGINES]
+        if bad:
+            print(f"✗ unknown engines: {bad}. Available: {', '.join(ENGINES)}", file=sys.stderr)
+            sys.exit(2)
+
     q = pathlib.Path(qfile).read_text()
     P.engines_dir(topic).mkdir(parents=True, exist_ok=True)
     P.question(topic).write_text(q)
-    engines = {k:v for k,v in ENGINES.items() if (only is None or k in only)}
-    print(f"topic={topic}, engines={len(engines)}: {', '.join(engines)}")
-    results = {}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=len(engines)) as ex:
-        futs = {ex.submit(fn, q): name for name, fn in engines.items()}
-        for fut in concurrent.futures.as_completed(futs):
-            name = futs[fut]
-            try:
-                res = fut.result()
-            except Exception as e:
-                res = {"error": f"{type(e).__name__}: {e}"}
-            results[name] = res
-            P.engine_raw(topic, name).write_text(json.dumps(res, ensure_ascii=False, indent=2))
-            if res.get("error"):
-                print(f"  ✗ {name}: {res['error']}")
+
+    # run intent = the full set of selected engines (denominator of the post-check)
+    intended = {k: v for k, v in ENGINES.items() if (only is None or k in only)}
+
+    # --skip-ok: don't re-run engines that already have a good report (--force overrides)
+    import engine_status as ES
+    to_run = dict(intended)
+    if skip_ok and not force:
+        kept = {}
+        for name, fn in intended.items():
+            if ES.status_for_file(P.engine_raw(topic, name)) == "ok":
+                print(f"  ⏭ {name}: already ok — skipping (--skip-ok)")
             else:
-                print(f"  ✓ {name}: {len(res.get('report',''))} chars, {len(res.get('sources',[]))} sources, ≈${res.get('cost_est')}, {res.get('seconds')}s")
+                kept[name] = fn
+        to_run = kept
+
+    print(f"topic={topic}, to run={len(to_run)}/{len(intended)}: {', '.join(to_run) or '—'}")
+    if to_run:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(to_run)) as ex:
+            futs = {ex.submit(fn, q): name for name, fn in to_run.items()}
+            for fut in concurrent.futures.as_completed(futs):
+                name = futs[fut]
+                try:
+                    res = fut.result()
+                except Exception as e:
+                    res = {"error": f"{type(e).__name__}: {e}"}
+                _atomic_write(P.engine_raw(topic, name), json.dumps(res, ensure_ascii=False, indent=2))
+                if res.get("error"):
+                    print(f"  ✗ {name}: {res['error']}")
+                else:
+                    print(f"  ✓ {name}: {len(res.get('report',''))} chars, "
+                          f"{len(res.get('sources',[]))} links, ≈${res.get('cost_est')}, {res.get('seconds')}s")
     print("saved to", P.engines_dir(topic))
+
+    # ── post-check: how many engines are actually usable (over the full intended set) ──
+    audit = ES.audit_topic(topic, list(intended.keys()))
+    usable = ES.print_summary(topic, audit)
+    if usable < min_ok:
+        print(f"✗ usable engines {usable} < threshold {min_ok} — do NOT run atomize/check_claims. "
+              f"Re-run the failed ones (engines.py {topic} <q> {','.join(intended)} --skip-ok).", file=sys.stderr)
+        sys.exit(2)
+    if usable < len(intended):
+        print(f"⚠ some engines dropped ({usable}/{len(intended)} usable) — coverage reduced, but threshold passed.")
+
 
 if __name__ == "__main__":
     main()

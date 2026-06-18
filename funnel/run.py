@@ -175,6 +175,14 @@ def run():
         print(f"✓ {name}")
     size = C.validate_report(topic, paged=use_paged())
     rel = pathlib.Path(report_html()).relative_to(ROOT)
+    # Append-only run receipt: git sha + content hashes of pool/config -> report (drift trail).
+    try:
+        import receipts
+        receipts.stamp(topic, "run",
+                       inputs=[P.pool(topic), P.config(topic)],
+                       outputs=[pathlib.Path(report_html())])
+    except Exception as e:
+        print(f"⚠ receipt skipped: {e}")
     print(f"\n✓ done: {rel} ({size // 1024} KB)")
 
 
