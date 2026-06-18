@@ -1,0 +1,19 @@
+{
+  "engine": "perplexity_deep",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Water freezes at zero degrees Celsius at standard atmospheric pressure.",
+      "label": "SUPPORTED",
+      "source": "https://en.wikipedia.org/wiki/Melting_point",
+      "final_source": "https://en.wikipedia.org/wiki/Melting_point",
+      "source_class": "A",
+      "source_alive": true,
+      "fabricated": false,
+      "corrected_value": null,
+      "has_number": false,
+      "confidence": "high",
+      "quote": "At standard pressure, water freezes at 0 °C."
+    }
+  ]
+}

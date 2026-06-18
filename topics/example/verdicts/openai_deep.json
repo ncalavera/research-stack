@@ -1,0 +1,19 @@
+{
+  "engine": "openai_deep",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "The Pacific Ocean is the largest ocean on Earth.",
+      "label": "SUPPORTED",
+      "source": "https://en.wikipedia.org/wiki/Pacific_Ocean",
+      "final_source": "https://en.wikipedia.org/wiki/Pacific_Ocean",
+      "source_class": "A",
+      "source_alive": true,
+      "fabricated": false,
+      "corrected_value": null,
+      "has_number": false,
+      "confidence": "high",
+      "quote": "The Pacific Ocean is the largest and deepest of Earth's oceans."
+    }
+  ]
+}

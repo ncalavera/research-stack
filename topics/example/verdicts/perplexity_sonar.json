@@ -1,0 +1,19 @@
+{
+  "engine": "perplexity_sonar",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "The Eiffel Tower is located in Paris, France.",
+      "label": "SUPPORTED",
+      "source": "https://en.wikipedia.org/wiki/Eiffel_Tower",
+      "final_source": "https://en.wikipedia.org/wiki/Eiffel_Tower",
+      "source_class": "A",
+      "source_alive": true,
+      "fabricated": false,
+      "corrected_value": null,
+      "has_number": false,
+      "confidence": "high",
+      "quote": "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France."
+    }
+  ]
+}

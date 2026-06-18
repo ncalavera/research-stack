@@ -1,0 +1,19 @@
+{
+  "engine": "exa_answer",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Mount Everest is the highest mountain above sea level on Earth.",
+      "label": "SUPPORTED",
+      "source": "https://en.wikipedia.org/wiki/Mount_Everest",
+      "final_source": "https://en.wikipedia.org/wiki/Mount_Everest",
+      "source_class": "A",
+      "source_alive": true,
+      "fabricated": false,
+      "corrected_value": null,
+      "has_number": false,
+      "confidence": "high",
+      "quote": "Mount Everest is Earth's highest mountain above sea level."
+    }
+  ]
+}

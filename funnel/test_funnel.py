@@ -2,7 +2,7 @@
 """Gate tests: verify that contracts catch violations, not pass them.
 
 Usage: python3 funnel/test_funnel.py
-Positive tests — on live data from topic1 (committed). Negative tests — on fabricated
+Positive tests — on live data from example (committed). Negative tests — on fabricated
 bad facts: the guard MUST reject them, otherwise the guarantee does not hold.
 """
 import sys
@@ -25,16 +25,16 @@ def check(name, cond):
         print(f"  ✗ {name}")
 
 
-print("Positive (build topic1 in memory, no file writes):")
+print("Positive (build example in memory, no file writes):")
 import build_pool as B
-_v = B.load_verdicts("topic1")
+_v = B.load_verdicts("example")
 _conf, _unconf = B.split(_v)
-_all = _conf + B.load_resourced("topic1")
+_all = _conf + B.load_resourced("example")
 _facts = [f for f in (B.to_fact(c["items"], {}) for c in B.cluster(_all)) if f]
-check("topic1 verdicts valid", C.validate_verdicts("topic1") >= 6)
-check("topic1 pool assembled, facts present", len(_facts) > 0)
+check("example verdicts valid", C.validate_verdicts("example") >= 6)
+check("example pool assembled, facts present", len(_facts) > 0)
 check("each fact has fid + anchor_id", all(f.get("fid") and f.get("anchor_id") for f in _facts))
-check("guard passes freshly built topic1 pool (text=anchor by construction)",
+check("guard passes freshly built example pool (text=anchor by construction)",
       C.offenders_in(_facts) == [])
 
 print("\nNegative (guard must reject):")
@@ -116,9 +116,9 @@ check("fact with source from verdicts — traceable",
 check("fact with source NOT from verdicts — flagged",
       C.orphans_in([{"provenance": [{"source": "https://evil.example/inject"}],
                      "best_source": "https://evil.example/inject"}], known))
-# freshly built topic1: sources are traceable to verdicts+re-sourcing (soft signal)
-_known = C.verdict_sources("topic1")
-check("topic1: fresh pool traceability is normal (soft signal)",
+# freshly built example: sources are traceable to verdicts+re-sourcing (soft signal)
+_known = C.verdict_sources("example")
+check("example: fresh pool traceability is normal (soft signal)",
       len(C.orphans_in(_facts, _known)) <= 10)
 
 print("\nOrder cannot be broken (input missing → refusal):")

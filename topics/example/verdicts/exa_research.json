@@ -1,0 +1,19 @@
+{
+  "engine": "exa_research",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "Photosynthesis converts light energy into chemical energy in plants.",
+      "label": "SUPPORTED",
+      "source": "https://en.wikipedia.org/wiki/Photosynthesis",
+      "final_source": "https://en.wikipedia.org/wiki/Photosynthesis",
+      "source_class": "A",
+      "source_alive": true,
+      "fabricated": false,
+      "corrected_value": null,
+      "has_number": false,
+      "confidence": "high",
+      "quote": "Photosynthesis converts light energy into chemical energy."
+    }
+  ]
+}

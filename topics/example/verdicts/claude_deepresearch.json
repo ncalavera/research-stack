@@ -1,0 +1,19 @@
+{
+  "engine": "claude_deepresearch",
+  "claims": [
+    {
+      "id": "c1",
+      "text": "The speed of light in vacuum is approximately 300,000 kilometers per second.",
+      "label": "SUPPORTED",
+      "source": "https://en.wikipedia.org/wiki/Speed_of_light",
+      "final_source": "https://en.wikipedia.org/wiki/Speed_of_light",
+      "source_class": "A",
+      "source_alive": true,
+      "fabricated": false,
+      "corrected_value": null,
+      "has_number": false,
+      "confidence": "high",
+      "quote": "The speed of light in vacuum is exactly 299,792,458 metres per second."
+    }
+  ]
+}
