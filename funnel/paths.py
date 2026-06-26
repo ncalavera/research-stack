@@ -112,6 +112,10 @@ def selection(topic: str) -> Path:
     return topic_dir(topic) / "selection.json"
 
 
+def select_by_source(topic: str) -> Path:
+    return topic_dir(topic) / "select_by_source.json"
+
+
 # ── verdicts ─────────────────────────────────────────────────────────────────
 
 def verdicts_dir(topic: str) -> Path:
@@ -152,8 +156,16 @@ def narratives(topic: str) -> Path:
     return topic_dir(topic) / "narratives.json"
 
 
+def narratives_lock(topic: str) -> Path:
+    return topic_dir(topic) / "narratives.lock"
+
+
 def config(topic: str) -> Path:
     return topic_dir(topic) / "config.json"
+
+
+def clarity_lock(topic: str) -> Path:
+    return topic_dir(topic) / "clarity.lock"
 
 
 # ── run artifacts ────────────────────────────────────────────────────────────

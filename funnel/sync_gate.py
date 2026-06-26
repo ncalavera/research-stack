@@ -18,13 +18,15 @@ Override stamp consciously: --accept-stale (printing on old prose under your res
 import hashlib
 import json
 import os
+import pathlib
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths as P
 
 
 def _p(topic, *parts):
-    return os.path.join(ROOT, "topics", topic, *parts)
+    return os.path.join(P.topic_dir(topic), *parts)
 
 
 def load_pool_fids(topic):

@@ -22,11 +22,13 @@ Output: topics/<topic>/select_by_source.json = {engine: [ {id,text,source,has_nu
 """
 import json
 import os
+import pathlib
 import re
 import sys
 from collections import defaultdict
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths as P
 
 # Text similarity threshold (Jaccard on words): above this — counts as a repeat of one idea.
 # 0.6 catches paraphrases of one conclusion across engines, does not touch different facts
@@ -66,7 +68,7 @@ def jaccard(a: set, b: set) -> float:
 
 
 def load_atoms(topic):
-    d = os.path.join(ROOT, "topics", topic, "atoms")
+    d = P.atoms_dir(topic)
     out = {}
     for f in sorted(os.listdir(d)):
         if f.endswith(".json"):
@@ -135,7 +137,7 @@ def main():
             "source": a["source"], "has_number": a["has_number"],
         })
 
-    out_path = os.path.join(ROOT, "topics", topic, "select_by_source.json")
+    out_path = str(P.select_by_source(topic))
     json.dump(dict(batches), open(out_path, "w"), ensure_ascii=False, indent=2)
 
     stats = {

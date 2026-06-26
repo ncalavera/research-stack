@@ -11,11 +11,13 @@ Exit 2 — under-coverage detected (another verification round needed), 0 — co
 """
 import json
 import os
+import pathlib
 import re
 import sys
 from collections import defaultdict
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths as P
 
 # Hosts of peer-reviewed journals / primary sources. Blogs (medium.com,
 # industry blogs, reddit...) are NOT included — their under-coverage is not counted.
@@ -56,7 +58,7 @@ def norm(url: str) -> str:
 
 
 def load_atoms(topic):
-    d = os.path.join(ROOT, "topics", topic, "atoms")
+    d = P.atoms_dir(topic)
     out = {}
     if not os.path.isdir(d):
         return out
@@ -67,7 +69,7 @@ def load_atoms(topic):
 
 
 def load_pool(topic):
-    p = os.path.join(ROOT, "topics", topic, "pool.json")
+    p = P.pool(topic)
     if not os.path.exists(p):
         return []
     d = json.load(open(p))

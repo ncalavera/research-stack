@@ -11,21 +11,22 @@ Usage: python3 funnel/stamp_clarity.py <topic>
 """
 import hashlib
 import json
-import os
+import pathlib
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths as P
 
 
 def narratives_hash(topic):
-    p = os.path.join(ROOT, "topics", topic, "narratives.json")
+    p = P.narratives(topic)
     return hashlib.sha1(open(p, "rb").read()).hexdigest()[:16]
 
 
 def main():
     topic = sys.argv[1] if len(sys.argv) > 1 else "topic1"
     h = narratives_hash(topic)
-    lock = os.path.join(ROOT, "topics", topic, "clarity.lock")
+    lock = P.clarity_lock(topic)
     json.dump({"narratives_hash": h}, open(lock, "w"), ensure_ascii=False, indent=2)
     print(f"✓ clarity audit stamped on prose: fingerprint {h} → clarity.lock")
 

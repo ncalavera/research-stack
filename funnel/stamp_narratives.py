@@ -10,20 +10,21 @@ Usage: python3 funnel/stamp_narratives.py <topic>
 """
 import hashlib
 import json
-import os
+import pathlib
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import paths as P
 
 
 def main():
     topic = sys.argv[1] if len(sys.argv) > 1 else "topic1"
-    pool_path = os.path.join(ROOT, "topics", topic, "pool.json")
+    pool_path = P.pool(topic)
     d = json.load(open(pool_path))
     facts = d if isinstance(d, list) else d.get("facts", [])
     fids = [f["fid"] for f in facts]
     h = hashlib.sha1("\n".join(sorted(fids)).encode()).hexdigest()[:16]
-    lock_path = os.path.join(ROOT, "topics", topic, "narratives.lock")
+    lock_path = P.narratives_lock(topic)
     json.dump({"pool_hash": h, "nfacts": len(fids)},
               open(lock_path, "w"), ensure_ascii=False, indent=2)
     print(f"✓ prose stamped on pool: {len(fids)} facts, fingerprint {h} → narratives.lock")
