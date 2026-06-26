@@ -260,5 +260,78 @@ check("stances: group with stances is valid (aa+bb grouped)",
 check("stances: unknown fid in stances doesn't cause error (cc standalone)",
       "cc" in _standalone3)
 
+print("\nCitation gate (citation_gate): prose href must match a pool source URL:")
+import citation_gate as CG
+
+# A prose href whose URL is NOT among the pool's verified sources must be flagged.
+_cg_pool = {U}
+_cg_hrefs = ["https://attacker.example/fake-source"]
+_cg_problems = [(h, "") for h in _cg_hrefs if h.strip() not in _cg_pool]
+check("citation: prose href not in pool → flagged",
+      len(_cg_problems) == 1)
+check("citation: prose href that matches a pool URL → clean",
+      [(h, "") for h in [U] if h.strip() not in _cg_pool] == [])
+
+print("\nRelevance gate (relevance_gate): off-topic fact verdict → excluded:")
+import relevance_gate as RG
+
+# A judge verdict marking a fid off-scope while it is still in the pool must be flagged.
+_rg_fids = ["f1", "f2"]
+_rg_verdicts = {"f2": {"scope": "off", "reason": "off-topic"}}
+_rg_off_in_pool = [fid for fid in _rg_fids if _rg_verdicts.get(fid, {}).get("scope") == "off"]
+check("relevance: off-scope fact still in pool → flagged",
+      _rg_off_in_pool == ["f2"])
+# Missing review degrades gracefully: soft audit reports 'missing' but does not hard-fail.
+_rg_problems, _rg_state = RG.audit("example", hard=False)
+check("relevance: missing review → 'missing' state (soft warn, not a hard fail)",
+      _rg_state == "missing")
+
+print("\nScope gate (scope_gate): personal-context marker → flagged:")
+import scope_gate as SG
+
+# A personal-context marker (visa) present in scanned text must be caught by the matcher.
+check("scope: personal marker (visa) present → matched",
+      bool(SG._RE.search("This requires a Global Talent visa application.")))
+check("scope: neutral general-knowledge text → no markers",
+      SG._RE.search("Water boils at 100 degrees Celsius at sea level.") is None)
+# Clean example must not trip the scope gate (no personal markers in inputs/output).
+check("scope: clean example has no personal markers (does not false-positive)",
+      SG.check("example") == [])
+
+print("\nTerm gate (term_gate): jargon before first-mention gloss → fail:")
+import term_gate as TG
+
+# Jargon used with NO adjacent explanation at first mention must be flagged.
+_tg_bad = "We will use HARO heavily to win coverage this quarter."
+_tg_problems_bad = []
+for _label, _pat in TG.TERMS:
+    import re as _re_tg
+    _m = _re_tg.search(_pat, _tg_bad, flags=_re_tg.IGNORECASE)
+    if not _m:
+        continue
+    _after = _tg_bad[_m.end(): _m.end() + TG.GAP_AFTER]
+    _before = _tg_bad[max(0, _m.start() - 90): _m.start()]
+    if TG.GLOSS_AFTER.search(_after) or TG.GLOSS_BEFORE.search(_before):
+        continue
+    _tg_problems_bad.append(_label)
+check("term: jargon (HARO) with no gloss at first mention → fail",
+      "HARO" in _tg_problems_bad)
+
+# Same jargon WITH an adjacent gloss at first mention → passes.
+_tg_good = "We will use HARO (a service connecting journalists with expert sources) heavily."
+_tg_problems_good = []
+for _label, _pat in TG.TERMS:
+    import re as _re_tg2
+    _m = _re_tg2.search(_pat, _tg_good, flags=_re_tg2.IGNORECASE)
+    if not _m:
+        continue
+    _after = _tg_good[_m.end(): _m.end() + TG.GAP_AFTER]
+    _before = _tg_good[max(0, _m.start() - 90): _m.start()]
+    if TG.GLOSS_AFTER.search(_after) or TG.GLOSS_BEFORE.search(_before):
+        continue
+    _tg_problems_good.append(_label)
+check("term: jargon (HARO) explained at first mention → passes",
+      "HARO" not in _tg_problems_good)
+
 print(f"\n{ok} passed, {fail} failed")
 sys.exit(1 if fail else 0)

@@ -89,6 +89,11 @@ STAGES = [
      None,
      None,
      True, True),                     # soft: under-coverage flag warns, does not block
+    ("RELEVANCE (fact on-topic)",
+     [PY, "funnel/relevance_gate.py", topic],
+     None,
+     None,
+     True, True),                     # soft: relevance is a judgement; warns, does not block
     ("audit_rejected",
      [PY, "funnel/audit_rejected.py", topic],
      lambda: C.validate_raw(topic),
@@ -120,6 +125,21 @@ STAGES = [
      None,
      None,
      True, False),                    # HARD: stale prose / fact without a section → block
+    ("TERMS (jargon explained)",
+     [PY, "funnel/term_gate.py", topic],
+     None,
+     None,
+     True, False),                    # HARD: term without an explanation at first mention → block
+    ("CITATIONS (hrefs point into the pool)",
+     [PY, "funnel/citation_gate.py", topic],
+     None,
+     None,
+     True, False),                    # HARD: truncated/foreign URL in prose → block
+    ("SCOPE (no personal context)",
+     [PY, "funnel/scope_gate.py", topic, "--hard"],
+     None,
+     None,
+     True, False),                    # HARD: visa/media pack/health in the report → block
     ("render (paged)" if use_paged() else "render_final",
      [PY, "render_paged.py", topic] if use_paged() else [PY, "render_final.py", topic],
      lambda: C.validate_config(topic),
