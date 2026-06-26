@@ -18,13 +18,16 @@ export const meta = {
   ],
 };
 
-// Пути темы и корень репозитория берём из js/paths.js (учитывает
-// RESEARCH_STACK_ROOT / RESEARCH_VAULT) — workflow зовут через scriptPath из
-// любого cwd, поэтому пути не строим от текущей папки.
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const P = require("../js/paths.js");
-const ROOT = P.ROOT; // корень репозитория для `cd ${ROOT} && python3 funnel/...`
+// Пути темы и корень репозитория НЕ строим от текущей папки — workflow зовут
+// через scriptPath из любого cwd. ROOT выводим из расположения самого файла
+// (он лежит на уровень глубже, в funnel/), переопределяется RESEARCH_STACK_ROOT.
+// DATA_ROOT учитывает хранилище (RESEARCH_VAULT) для данных тем, иначе — корень репо.
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+const ROOT =
+  process.env.RESEARCH_STACK_ROOT ||
+  dirname(dirname(fileURLToPath(import.meta.url))); // корень репозитория для `cd ${ROOT} && python3 funnel/...`
+const DATA_ROOT = process.env.RESEARCH_VAULT || ROOT; // корень данных тем
 
 // args иногда приходит JSON-строкой — нормализуем; молчаливого дефолта
 // темы НЕТ (иначе при сбое передачи веер правит чужой отчёт).
@@ -45,9 +48,9 @@ if (typeof TOPIC !== "string" || !/^[a-z0-9][a-z0-9_-]{2,}$/.test(TOPIC)) {
       `чтобы при сбое передачи args не править чужой отчёт.`,
   );
 }
-const NARR = P.narratives(TOPIC);
-const CFG = P.config(TOPIC);
-const FINDINGS = P.clarityFindings(TOPIC);
+const NARR = `${DATA_ROOT}/topics/${TOPIC}/narratives.json`;
+const CFG = `${DATA_ROOT}/topics/${TOPIC}/config.json`;
+const FINDINGS = `${DATA_ROOT}/topics/${TOPIC}/clarity_findings.json`;
 const MAX_ROUNDS = 3;
 
 // ─── Схема находки: детерминированный контракт между искателем и правщиком ───

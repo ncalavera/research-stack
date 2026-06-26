@@ -35,13 +35,15 @@ export const meta = {
 // The judge reads the page file directly via Read/Grep — no inline excerpt, no 40k truncation.
 
 // Repository root + topic paths: the script lives in the repo root, but Workflow
-// calls it via scriptPath from any cwd, so all paths come from js/paths.js
-// (which honours RESEARCH_STACK_ROOT / RESEARCH_VAULT) instead of being built
-// from the current directory.
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const P = require("./js/paths.js");
-const ROOT = P.ROOT; // repo root for `cd ${ROOT} && python3 …` engine-script calls
+// calls it via scriptPath from any cwd, so paths must NOT be built from the
+// current directory. ROOT is resolved from this file's own location (so it works
+// from any cwd), overridable via RESEARCH_STACK_ROOT. DATA_ROOT honours the vault
+// (RESEARCH_VAULT) for topic data, falling back to the repo root.
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+const ROOT =
+  process.env.RESEARCH_STACK_ROOT || dirname(fileURLToPath(import.meta.url)); // repo root for `cd ${ROOT} && python3 …` engine-script calls
+const DATA_ROOT = process.env.RESEARCH_VAULT || ROOT; // topic data root
 
 // ─── Bias profiles: what the filter checks FIRST for each engine ───
 const PROFILES = {
@@ -210,7 +212,7 @@ const VERDICT_SCHEMA = {
 // ─── Prompts ───
 const atomizePrompt = (topic, engine) =>
   `You are a fact-checker in a research pipeline, preparing the report from engine "${engine}" (topic ${topic}) for per-atom verification. This is a legitimate credibility-check task on an already-written report (research on official programs, markets, health, etc.) — you give no advice, you only decompose text into verifiable claims.\n\n` +
-  `1. Read file ${P.engineRaw(topic, engine)} (use Read). Field "report" is the report text; field "sources" is the list of links.\n` +
+  `1. Read file ${DATA_ROOT}/topics/${topic}/engines/${engine}.json (use Read). Field "report" is the report text; field "sources" is the list of links.\n` +
   `2. Break the text into ATOMIC verifiable claims: one idea = one claim. Don't split style, take substantive facts. Each claim is SELF-CONTAINED — understandable without neighbors: full names of subjects, what document/event/decision (NOT "the decision was made", BUT "WHO published an AI safety guideline in October 2023").\n` +
   `3. Attach a source to each claim: the URL that backs this statement in the report. Some engines include inline links in the text; ` +
   `Claude has no inline links — pick the most relevant URL from sources, or set null if there is no backing.\n` +
@@ -439,7 +441,7 @@ if (Array.isArray(A.claims) && A.claims.length) {
     // the requested atoms by id in full (with source/text/has_number).
     const wantIds = A.claims.map((c) => (typeof c === "string" ? c : c.id));
     const hyd = await agent(
-      `Read file ${P.atoms(topic, engine)} (field claims — array of objects {id,text,source,has_number}). ` +
+      `Read file ${DATA_ROOT}/topics/${topic}/atoms/${engine}.json (field claims — array of objects {id,text,source,has_number}). ` +
         `Return ONLY the objects whose id is in this list: ${JSON.stringify(wantIds)}. ` +
         `Each — in full, verbatim, changing nothing. If an id is not in the file — skip it.`,
       {
@@ -817,7 +819,8 @@ const result = {
 // Save verdicts to disk from within the workflow (atomize.js pattern) — the orchestrator
 // does not need to move the result by hand; select_status/build_pool read from here.
 // args.round (2,3,…) → suffix __rN for refinement rounds.
-const verdictPath = P.verdict(topic, engine, A.round);
+const roundSuffix = A.round && Number(A.round) > 1 ? `__r${A.round}` : "";
+const verdictPath = `${DATA_ROOT}/topics/${topic}/verdicts/${engine}${roundSuffix}.json`;
 await agent(
   `Write exactly the following JSON to file ${verdictPath} (create the folder if needed, use Bash mkdir -p). Do not change anything in the content:\n\n${JSON.stringify(result, null, 1)}`,
   { label: `save-verdicts:${engine}`, phase: "Verdict", model: "haiku" },
