@@ -41,7 +41,9 @@ def prose_hrefs(topic: str):
     if cfg_path.exists():
         nf = json.loads(cfg_path.read_text("utf-8")).get("narratives_file")
         if nf:
-            narr_file = ROOT / nf
+            # Resolve the config-supplied name inside the (vault-aware) topic
+            # dir by basename, so it never escapes to the repo root.
+            narr_file = P.topic_dir(topic) / pathlib.Path(nf).name
     text = pathlib.Path(narr_file).read_text("utf-8")
     return re.findall(r"href=['\"]([^'\"]+)['\"]", text)
 

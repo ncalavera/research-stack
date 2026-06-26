@@ -55,17 +55,16 @@ def topics_root_for(topic: str) -> Path:
     """Resolve the topics/ root holding this topic.
 
     Precedence:
-      1. RESEARCH_VAULT unset            -> repo `topics/` (bundled example).
-      2. vault set, topic in vault       -> `$RESEARCH_VAULT/topics`.
-      3. vault set, topic only in repo   -> repo `topics/` (bundled example).
-      4. vault set, topic in neither     -> `$RESEARCH_VAULT/topics` (new topic).
+      1. RESEARCH_VAULT unset       -> repo `topics/` (bundled example / demo / CI).
+      2. vault set, topic in vault  -> `$RESEARCH_VAULT/topics`.
+      3. vault set, otherwise       -> `$RESEARCH_VAULT/topics` (new topic).
+
+    When a vault is configured it always owns reads and writes, so a run can
+    never write into the git-tracked `topics/example` fixture. The bundled
+    example is a no-vault demo: run it with RESEARCH_VAULT unset.
     """
     vault = _vault_root()
     if vault is None:
-        return REPO_ROOT / "topics"
-    if (vault / "topics" / topic).exists():
-        return vault / "topics"
-    if (REPO_ROOT / "topics" / topic).exists():
         return REPO_ROOT / "topics"
     return vault / "topics"
 
