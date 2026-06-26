@@ -51,7 +51,13 @@ if not title:
 
 
 def _cfg():
-    return json.loads(P.config(topic).read_text("utf-8"))
+    # Config is scaffolded mid-chain (scaffold_config stage), so it may not exist
+    # yet when renderer selection is first evaluated. Treat a missing config as
+    # empty defaults rather than crashing the chain before bootstrap.
+    p = P.config(topic)
+    if not p.exists():
+        return {}
+    return json.loads(p.read_text("utf-8"))
 
 
 # Renderer selection: paged (consulting paginated layout) — default for all reports;

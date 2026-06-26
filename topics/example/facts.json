@@ -1,22 +1,37 @@
 {
   "_doc": "Neutral example topic — demonstrates the question/facts schema. Replace with your own.",
-  "topic": "example_renewable_grid",
-  "persona": "A policy analyst evaluating grid-scale energy storage options.",
+  "topic": "example_general_knowledge",
+  "persona": "A reader fact-checking common general-knowledge claims.",
   "questions": [
     {
       "id": "ex_q1",
-      "group": "Storage",
-      "q": "What are the most cost-effective grid-scale energy storage technologies as of recent data?"
+      "group": "Science",
+      "q": "What is the approximate speed of light in vacuum?"
     },
     {
       "id": "ex_q2",
-      "group": "Storage",
-      "q": "What round-trip efficiency do lithium-ion grid batteries achieve in practice?"
+      "group": "Science",
+      "q": "What does photosynthesis do with light energy?"
     },
     {
       "id": "ex_q3",
-      "group": "Integration",
-      "q": "What share of variable renewables can a grid absorb before storage becomes the binding constraint?"
+      "group": "Science",
+      "q": "At what temperature does water freeze at standard atmospheric pressure?"
+    },
+    {
+      "id": "ex_q4",
+      "group": "Geography",
+      "q": "Which is the highest mountain above sea level on Earth?"
+    },
+    {
+      "id": "ex_q5",
+      "group": "Geography",
+      "q": "Which is the largest ocean on Earth?"
+    },
+    {
+      "id": "ex_q6",
+      "group": "Geography",
+      "q": "In which city is the Eiffel Tower located?"
     }
   ]
 }

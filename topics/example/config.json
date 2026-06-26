@@ -1,0 +1,17 @@
+{
+  "_meta": "Hand-authored neutral example config. scaffold_config.py leaves an existing config untouched.",
+  "lang": "en",
+  "page_title": "Example Verified Report",
+  "kicker": "Verified Report · fact-check funnel",
+  "title_html": "Example Verified Report",
+  "dek": "Six common general-knowledge claims, each checked against a live primary source rather than simply asserted.",
+  "intro": "",
+  "show_personal_dek": false,
+  "tldr_title": "If you read only this",
+  "narratives_file": "topics/example/narratives.json",
+  "section_order": ["Science", "Geography & Landmarks"],
+  "footer_methods": "Engines: Exa research/answer, OpenAI o4-mini deep research, Perplexity sonar and deep, Claude deep research. Each fact passed fact-check gates: confirmed by a live class A/B source. The number next to a fact is how many engines found it.",
+  "footer_note": "Assembled by the research-stack fact-check funnel. Topic: example.",
+  "out": "reports/REPORT-example.html",
+  "renderer": "paged"
+}

@@ -1,7 +1,10 @@
-Persona / context: A policy analyst evaluating grid-scale energy storage options.
+Persona / context: A reader fact-checking common general-knowledge claims.
 
 Research the following questions and produce a sourced report:
 
-1. [Storage] What are the most cost-effective grid-scale energy storage technologies as of recent data?
-2. [Storage] What round-trip efficiency do lithium-ion grid batteries achieve in practice?
-3. [Integration] What share of variable renewables can a grid absorb before storage becomes the binding constraint?
+1. [Science] What is the approximate speed of light in vacuum?
+2. [Science] What does photosynthesis do with light energy?
+3. [Science] At what temperature does water freeze at standard atmospheric pressure?
+4. [Geography] Which is the highest mountain above sea level on Earth?
+5. [Geography] Which is the largest ocean on Earth?
+6. [Geography] In which city is the Eiffel Tower located?
