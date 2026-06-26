@@ -87,11 +87,35 @@ def test_no_public_leaks():
     )
 
 
+def _stray_topics():
+    """Tracked topic paths outside topics/example/ — real research must never ship."""
+    import subprocess
+    out = subprocess.run(
+        ["git", "ls-files", "topics/"],
+        cwd=ROOT, capture_output=True, text=True,
+    ).stdout.splitlines()
+    return [p for p in out if p.strip() and not p.startswith("topics/example/")]
+
+
+def test_only_example_topic_is_tracked():
+    stray = _stray_topics()
+    assert not stray, (
+        "Topics other than the bundled example are tracked — real research data "
+        "must stay in the vault:\n  " + "\n  ".join(stray)
+    )
+
+
 if __name__ == "__main__":
     leaks = find_leaks()
-    if leaks:
-        print(f"LEAK: {len(leaks)} forbidden token(s) found:")
-        for f, n, p, snippet in leaks:
-            print(f"  {f}:{n}  /{p}/  {snippet}")
+    stray = _stray_topics()
+    if leaks or stray:
+        if leaks:
+            print(f"LEAK: {len(leaks)} forbidden token(s) found:")
+            for f, n, p, snippet in leaks:
+                print(f"  {f}:{n}  /{p}/  {snippet}")
+        if stray:
+            print(f"LEAK: {len(stray)} non-example topic path(s) tracked:")
+            for p in stray:
+                print(f"  {p}")
         raise SystemExit(1)
     print("OK — no public leaks.")
