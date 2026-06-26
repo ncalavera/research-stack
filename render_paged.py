@@ -89,11 +89,60 @@ def cfg(key, default=""):
 POOL = json.loads(P.pool(TOPIC).read_text("utf-8"))
 REJ = load(P.audit(TOPIC),
            {"summary": {}, "rows": [], "recovery_candidates": []})
-NARR = load(ROOT / cfg("narratives_file", str(P.narratives(TOPIC).relative_to(ROOT))), {})
+# narratives_file: a bare filename (no "/") resolves against the TOPIC dir, not
+# the repo root — otherwise "narratives.json" pointed at ROOT and the prose was
+# lost silently (report with chapter headers but empty body). A slashed path
+# (e.g. "topics/x/narratives.json") stays relative to ROOT.
+_nf = cfg("narratives_file")
+if not _nf:
+    _narr_path = P.narratives(TOPIC)
+elif "/" in _nf:
+    _narr_path = ROOT / _nf
+else:
+    _narr_path = P.topic_dir(TOPIC) / _nf
+NARR = load(_narr_path, {})
+if not NARR and _narr_path.exists() is False:
+    sys.stderr.write(
+        f"⚠ render_paged: narratives file not found: {_narr_path} — "
+        f"report will build WITHOUT prose (fact cards only).\n")
+
+# Normalise narrative shape: a subagent may return either the flat form
+# ({sec: prose, "_keypoints": {sec:[...]}, ...}) or the nested form
+# ({sec: {prose, _keypoints, _so_what, _action_plan}}). Accept both — otherwise
+# the renderer choked on a dict where it expected a prose string.
+if any(isinstance(v, dict) and "prose" in v
+       for k, v in NARR.items() if not k.startswith("_")):
+    _flat = {}
+    _kp = dict(NARR.get("_keypoints", {}))
+    _sw = dict(NARR.get("_so_what", {}))
+    _ap = list(NARR.get("_action_plan", []))
+    for k, v in NARR.items():
+        if k.startswith("_"):
+            _flat[k] = v
+        elif isinstance(v, dict):
+            _flat[k] = v.get("prose", "")
+            if v.get("_keypoints"):
+                _kp[k] = v["_keypoints"]
+            if v.get("_so_what"):
+                _sw[k] = v["_so_what"]
+            if v.get("_action_plan"):
+                _ap.extend(v["_action_plan"])
+        else:
+            _flat[k] = v
+    _flat["_keypoints"], _flat["_so_what"] = _kp, _sw
+    if _ap:
+        _flat["_action_plan"] = _ap
+    NARR = _flat
+
 SO_WHAT = NARR.get("_so_what", {})
 KEYPOINTS = NARR.get("_keypoints", {})
 TABLES = NARR.get("_tables", {})
-ACTION_PLAN = NARR.get("_action_plan", [])
+# _action_plan: accept both bare strings and [label, text] pairs; the renderer
+# expects pairs (bare strings broke unpacking under enumerate).
+ACTION_PLAN = [
+    x if (isinstance(x, (list, tuple)) and len(x) == 2) else ["", str(x)]
+    for x in NARR.get("_action_plan", [])
+]
 INFOGRAPHIC = NARR.get("_infographic", {})
 DASHBOARD = NARR.get("_dashboard", {})
 SECTION_VIZ = NARR.get("_section_viz", {})
@@ -918,7 +967,10 @@ end_body = (f'<div class="end-inner">'
             f'<h2 class="end-h">{title_html}</h2></div>'
             f'<div class="end-grid">'
             f'<div><div class="end-lbl">Authors</div>'
-            + (f'<p><b>{esc(cfg("author"))}</b> — research &amp; engine</p>' if cfg("author") else "") +
+            # Byline author is configurable via the topic config "author" field;
+            # absent → a generic engine label (no hardcoded personal name).
+            + (f'<p><b>{esc(cfg("author"))}</b> — research &amp; engine</p>' if cfg("author")
+               else '<p><b>Research &amp; fact-check engine</b></p>') +
             f'<p><b>Claude (Anthropic)</b> — fact-check funnel research-stack</p></div>'
             f'<div><div class="end-lbl">Project</div>'
             f'<p><b>{esc(cfg("kicker") or page_title)}</b></p>'
