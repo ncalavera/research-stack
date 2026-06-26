@@ -4,7 +4,7 @@ One topic, one run, one report. Guarantee: no fact reaches the report without a 
 
 ## Contract (one logic for any topic)
 
-`topic` — any slug (`topic1`, `work-pricing`, `churn-q3`). Each step is `<script> <topic>`, reading and writing to fixed paths:
+`topic` — any slug (`topic1`, `work-pricing`, `churn-q3`). Each step is `<script> <topic>`, reading and writing to fixed paths. The `topics/<topic>/` root below is resolved by `funnel/paths.py`: when `RESEARCH_VAULT` is set it lives at `$RESEARCH_VAULT/topics/<topic>/` (the vault owns all reads and writes); when unset it falls back to the repo's `topics/` — i.e. the bundled `topics/example` demo. So the same paths point at private data in normal use and at the shipped example with no setup. See [README → Data location](README.md#data-location--research_vault).
 
 ```
 topics/<topic>/question.txt                  full question for the engines
@@ -22,10 +22,12 @@ topics/<topic>/config.json                   layout: title, sections, footer
 topics/<topic>/narratives.json               prose per section (opt.)
 topics/<topic>/evidence/                     archive of source pages
 topics/<topic>/manifest.json                 round log for the topic
-reports/REPORT-<topic>.html                  output (renderer — always in reports/)
+reports/REPORT-<topic>.html                  output (renderer — always in the repo's reports/)
 ```
 
-Add a topic = create `topics/<topic>/facts.json` + `topics/<topic>/question.txt`. Everything else the scripts create automatically.
+(`topics/<topic>/` resolves under `$RESEARCH_VAULT` when set — see the note above.)
+
+Add a topic = create `facts.json` + `question.txt` in the topic directory (`$RESEARCH_VAULT/topics/<topic>/` with a vault, else `topics/<topic>/`). Everything else the scripts create automatically.
 
 ## Stages
 
