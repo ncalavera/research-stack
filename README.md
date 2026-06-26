@@ -63,15 +63,44 @@ python3 funnel/test_funnel.py                      # gate tests
 python3 funnel/gate.py <topic>                     # gate only (exit 1 = print refused)
 ```
 
-Add a topic = create `topics/<topic>/facts.json` + `topics/<topic>/question.txt`;
-the scripts create everything else. A minimal example lives in `topics/example/`.
+Add a topic = create `facts.json` + `question.txt` under the topic directory;
+the scripts create everything else. A minimal example lives in `topics/example/` —
+run it as-is with no setup (see below).
+
+## Data location — `RESEARCH_VAULT`
+
+The engine is code only; your research data lives in a separate folder you point it
+at with the `RESEARCH_VAULT` environment variable. One engine, each user's own data —
+improving the engine improves everyone's runs, no fork.
+
+- **No vault set** → the engine reads and writes `topics/` inside the repo. This is
+  the bundled `topics/example/` demo, meant for a zero-setup trial and CI:
+
+  ```bash
+  python3 funnel/run.py example          # writes reports/REPORT-example-paged.html
+  ```
+
+- **Vault set** → `RESEARCH_VAULT` owns all reads and writes. Every topic lives under
+  `$RESEARCH_VAULT/topics/<topic>/`, so a run can never touch the git-tracked
+  `topics/example` fixture. Point it at any folder (a private git repo is recommended —
+  the data is yours and never belongs in the public engine):
+
+  ```bash
+  export RESEARCH_VAULT=~/research-vault
+  mkdir -p "$RESEARCH_VAULT/topics/<topic>"          # add facts.json + question.txt here
+  python3 funnel/run.py <topic> "Report title"        # reads/writes under the vault
+  ```
+
+  A missing `RESEARCH_VAULT` directory is an error, not a silent fall-through to a repo
+  write. Optional personalisation (a profile JSON) and the topic catalog also live in the
+  vault; `funnel/publish.py` surfaces finished reports from the vault into your notes.
 
 ## Configuration
 
 All API keys are read from the environment — **no secrets in the code**:
 `GEMINI_API_KEY`, `PERPLEXITY_API_KEY`, `OPENAI_API_KEY`, `EXA_API_KEY`,
 `ANTHROPIC_API_KEY`. Optional: `UNPAYWALL_EMAIL` (open-access resolver),
-`RESEARCH_VAULT` (target dir for `funnel/publish.py`).
+`RESEARCH_VAULT` (data root for every topic — see [Data location](#data-location--research_vault); default: repo `topics/` for the bundled example).
 
 Requires Python 3.10+ and Node 18+ (for the `.js` tools).
 
