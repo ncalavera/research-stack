@@ -1,4 +1,4 @@
-# research-factcheck-funnel
+# research-stack
 
 A deep-research pipeline with a **fact-check gate**: no claim reaches the final
 report without a live, verified source backing that exact wording. The guarantee
