@@ -1,0 +1,203 @@
+{
+ "topic": "example",
+ "facts": [
+  {
+   "fid": "ffab007562d1",
+   "text": "The speed of light in vacuum is approximately 300,000 kilometers per second.",
+   "corrected": null,
+   "anchor_id": "claude_deepresearch:c1",
+   "section": "Science",
+   "provenance": [
+    {
+     "engine": "claude_deepresearch",
+     "claim_id": "claude_deepresearch:c1",
+     "text": "The speed of light in vacuum is approximately 300,000 kilometers per second.",
+     "source": "https://en.wikipedia.org/wiki/Speed_of_light",
+     "class": "A",
+     "label": "SUPPORTED",
+     "source_alive": true,
+     "fabricated": false,
+     "corrected": null,
+     "is_anchor": true,
+     "source_name": "en.wikipedia.org",
+     "source_year": null,
+     "quote": "The speed of light in vacuum is exactly 299,792,458 metres per second."
+    }
+   ],
+   "best_source": "https://en.wikipedia.org/wiki/Speed_of_light",
+   "best_class": "A",
+   "engines_count": 1,
+   "confidence": "high",
+   "needs_review": false,
+   "note": "",
+   "best_source_name": "en.wikipedia.org",
+   "best_source_year": null,
+   "quote": "The speed of light in vacuum is exactly 299,792,458 metres per second."
+  },
+  {
+   "fid": "809fa660c9eb",
+   "text": "Mount Everest is the highest mountain above sea level on Earth.",
+   "corrected": null,
+   "anchor_id": "exa_answer:c1",
+   "section": "Geography & Landmarks",
+   "provenance": [
+    {
+     "engine": "exa_answer",
+     "claim_id": "exa_answer:c1",
+     "text": "Mount Everest is the highest mountain above sea level on Earth.",
+     "source": "https://en.wikipedia.org/wiki/Mount_Everest",
+     "class": "A",
+     "label": "SUPPORTED",
+     "source_alive": true,
+     "fabricated": false,
+     "corrected": null,
+     "is_anchor": true,
+     "source_name": "en.wikipedia.org",
+     "source_year": null,
+     "quote": "Mount Everest is Earth's highest mountain above sea level."
+    }
+   ],
+   "best_source": "https://en.wikipedia.org/wiki/Mount_Everest",
+   "best_class": "A",
+   "engines_count": 1,
+   "confidence": "high",
+   "needs_review": false,
+   "note": "",
+   "best_source_name": "en.wikipedia.org",
+   "best_source_year": null,
+   "quote": "Mount Everest is Earth's highest mountain above sea level."
+  },
+  {
+   "fid": "1369ee54f320",
+   "text": "Photosynthesis converts light energy into chemical energy in plants.",
+   "corrected": null,
+   "anchor_id": "exa_research:c1",
+   "section": "Science",
+   "provenance": [
+    {
+     "engine": "exa_research",
+     "claim_id": "exa_research:c1",
+     "text": "Photosynthesis converts light energy into chemical energy in plants.",
+     "source": "https://en.wikipedia.org/wiki/Photosynthesis",
+     "class": "A",
+     "label": "SUPPORTED",
+     "source_alive": true,
+     "fabricated": false,
+     "corrected": null,
+     "is_anchor": true,
+     "source_name": "en.wikipedia.org",
+     "source_year": null,
+     "quote": "Photosynthesis converts light energy into chemical energy."
+    }
+   ],
+   "best_source": "https://en.wikipedia.org/wiki/Photosynthesis",
+   "best_class": "A",
+   "engines_count": 1,
+   "confidence": "high",
+   "needs_review": false,
+   "note": "",
+   "best_source_name": "en.wikipedia.org",
+   "best_source_year": null,
+   "quote": "Photosynthesis converts light energy into chemical energy."
+  },
+  {
+   "fid": "eef6e32c8857",
+   "text": "The Pacific Ocean is the largest ocean on Earth.",
+   "corrected": null,
+   "anchor_id": "openai_deep:c1",
+   "section": "Geography & Landmarks",
+   "provenance": [
+    {
+     "engine": "openai_deep",
+     "claim_id": "openai_deep:c1",
+     "text": "The Pacific Ocean is the largest ocean on Earth.",
+     "source": "https://en.wikipedia.org/wiki/Pacific_Ocean",
+     "class": "A",
+     "label": "SUPPORTED",
+     "source_alive": true,
+     "fabricated": false,
+     "corrected": null,
+     "is_anchor": true,
+     "source_name": "en.wikipedia.org",
+     "source_year": null,
+     "quote": "The Pacific Ocean is the largest and deepest of Earth's oceans."
+    }
+   ],
+   "best_source": "https://en.wikipedia.org/wiki/Pacific_Ocean",
+   "best_class": "A",
+   "engines_count": 1,
+   "confidence": "high",
+   "needs_review": false,
+   "note": "",
+   "best_source_name": "en.wikipedia.org",
+   "best_source_year": null,
+   "quote": "The Pacific Ocean is the largest and deepest of Earth's oceans."
+  },
+  {
+   "fid": "a284e5816339",
+   "text": "Water freezes at zero degrees Celsius at standard atmospheric pressure.",
+   "corrected": null,
+   "anchor_id": "perplexity_deep:c1",
+   "section": "Science",
+   "provenance": [
+    {
+     "engine": "perplexity_deep",
+     "claim_id": "perplexity_deep:c1",
+     "text": "Water freezes at zero degrees Celsius at standard atmospheric pressure.",
+     "source": "https://en.wikipedia.org/wiki/Melting_point",
+     "class": "A",
+     "label": "SUPPORTED",
+     "source_alive": true,
+     "fabricated": false,
+     "corrected": null,
+     "is_anchor": true,
+     "source_name": "en.wikipedia.org",
+     "source_year": null,
+     "quote": "At standard pressure, water freezes at 0 °C."
+    }
+   ],
+   "best_source": "https://en.wikipedia.org/wiki/Melting_point",
+   "best_class": "A",
+   "engines_count": 1,
+   "confidence": "high",
+   "needs_review": false,
+   "note": "",
+   "best_source_name": "en.wikipedia.org",
+   "best_source_year": null,
+   "quote": "At standard pressure, water freezes at 0 °C."
+  },
+  {
+   "fid": "87fcb855f309",
+   "text": "The Eiffel Tower is located in Paris, France.",
+   "corrected": null,
+   "anchor_id": "perplexity_sonar:c1",
+   "section": "Geography & Landmarks",
+   "provenance": [
+    {
+     "engine": "perplexity_sonar",
+     "claim_id": "perplexity_sonar:c1",
+     "text": "The Eiffel Tower is located in Paris, France.",
+     "source": "https://en.wikipedia.org/wiki/Eiffel_Tower",
+     "class": "A",
+     "label": "SUPPORTED",
+     "source_alive": true,
+     "fabricated": false,
+     "corrected": null,
+     "is_anchor": true,
+     "source_name": "en.wikipedia.org",
+     "source_year": null,
+     "quote": "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France."
+    }
+   ],
+   "best_source": "https://en.wikipedia.org/wiki/Eiffel_Tower",
+   "best_class": "A",
+   "engines_count": 1,
+   "confidence": "high",
+   "needs_review": false,
+   "note": "",
+   "best_source_name": "en.wikipedia.org",
+   "best_source_year": null,
+   "quote": "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris, France."
+  }
+ ]
+}

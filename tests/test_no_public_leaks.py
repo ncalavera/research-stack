@@ -21,8 +21,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 DENYLIST = pathlib.Path(__file__).resolve().parent / "denylist.txt"
 DENYLIST_PRIVATE = pathlib.Path(__file__).resolve().parent / "denylist.private.txt"
 
-# Directories never scanned.
-SKIP_DIRS = {".git", "__pycache__", "node_modules", ".fetch_cache", ".bakeoff"}
+# Directories never scanned. `docs/` holds planning prose (brainstorms, plans)
+# that legitimately names the very tokens being scrubbed from shipped code; the
+# guard protects code and data, not the planning record.
+SKIP_DIRS = {".git", "__pycache__", "node_modules", ".fetch_cache", ".bakeoff", "docs"}
 # Files never scanned (the denylists and this test legitimately contain the tokens).
 SKIP_FILES = {
     DENYLIST.resolve(),

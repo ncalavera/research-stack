@@ -1,0 +1,27 @@
+{
+  "_meta": "Neutral English example prose. Two chapters keyed to config.section_order. Every number traces to a confirmed fact; each claim references its fact card.",
+
+  "_tldr": [
+    "All six claims in this demo are confirmed by a live primary source — none rest on assertion alone.",
+    "Science: light travels through vacuum at roughly 300,000 kilometres per second, photosynthesis turns light energy into chemical energy, and water freezes at zero degrees Celsius at standard pressure.",
+    "Geography: Mount Everest is the highest mountain above sea level, the Pacific is the largest ocean, and the Eiffel Tower stands in Paris.",
+    "The point of the example is the method, not the facts: each card carries its source class, engine count, and a verbatim quote from the source."
+  ],
+
+  "Science": "<p><b>What is confirmed.</b> Three textbook claims about the physical world, each backed by a live source. The speed of light in vacuum is approximately 300,000 kilometres per second — the canonical constant of physics. Photosynthesis converts light energy into chemical energy in plants, the reaction that underpins most food chains. Water freezes at zero degrees Celsius at standard atmospheric pressure, the familiar reference point of the Celsius scale.</p><p><b>Why it is here.</b> These are deliberately uncontroversial, so the demo shows the funnel's plumbing rather than any contested finding. Each fact card below records the source class, how many engines surfaced it, and the exact quote the source provided.</p>",
+
+  "Geography & Landmarks": "<p><b>What is confirmed.</b> Three claims about places on Earth, each backed by a live source. Mount Everest is the highest mountain above sea level. The Pacific Ocean is the largest ocean on Earth. The Eiffel Tower is located in Paris, France.</p><p><b>Why it is here.</b> As with the science chapter, the claims are chosen for being beyond dispute: the example exists to demonstrate end-to-end rendering, not to settle an open question. The evidence appendix lists every source in full.</p>",
+
+  "_keypoints": {
+    "Science": [
+      "Speed of light in vacuum: approximately 300,000 kilometres per second",
+      "Photosynthesis converts light energy into chemical energy in plants",
+      "Water freezes at zero degrees Celsius at standard atmospheric pressure"
+    ],
+    "Geography & Landmarks": [
+      "Mount Everest is the highest mountain above sea level on Earth",
+      "The Pacific Ocean is the largest ocean on Earth",
+      "The Eiffel Tower is located in Paris, France"
+    ]
+  }
+}
