@@ -22,11 +22,16 @@ export const meta = {
 // paths must NOT be built from the current directory. ROOT is resolved from this
 // file's own location, overridable via RESEARCH_STACK_ROOT. DATA_ROOT honours the
 // vault (RESEARCH_VAULT) for topic data, falling back to the repo root.
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-const ROOT =
-  process.env.RESEARCH_STACK_ROOT || dirname(fileURLToPath(import.meta.url)); // repo root for `cd ${ROOT} && ./resolve_oa.py | ./fetch_url.sh`
-const DATA_ROOT = process.env.RESEARCH_VAULT || ROOT; // topic data root
+// NOTE: static `import ... from` is unavailable in the Workflow sandbox (the script
+// body is parsed as an async function body, where import statements are a syntax
+// error). Resolve roots from env when the runtime exposes `process`, with
+// `args.stackRoot` / `args.dataRoot` overrides applied after args are parsed.
+let __env = {};
+try {
+  __env = (typeof process !== "undefined" && process.env) || {};
+} catch {}
+let ROOT = __env.RESEARCH_STACK_ROOT || ""; // repo root for engine-script Bash calls
+let DATA_ROOT = __env.RESEARCH_VAULT || ROOT; // topic data root
 
 const SCHEMA = {
   type: "object",
@@ -96,6 +101,12 @@ if (typeof A === "string") {
   }
 }
 A = A || {};
+if (A.stackRoot) ROOT = A.stackRoot;
+if (A.dataRoot) DATA_ROOT = A.dataRoot;
+if (!ROOT || !DATA_ROOT)
+  throw new Error(
+    "no roots — pass args.stackRoot (research-stack repo) and args.dataRoot (vault), or set RESEARCH_STACK_ROOT/RESEARCH_VAULT",
+  );
 const topic = A.topic || "topic1";
 // Facts are accepted as strings OR objects {id?, text, hint?}. The agent prompt receives
 // text + hint (otherwise interpolation yields "[object Object]"), but the RESULT

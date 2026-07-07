@@ -32,13 +32,22 @@ def _p(*parts):
     return ROOT.joinpath(*parts)
 
 
+def _rel(path):
+    # Topic data may live outside the engine repo (RESEARCH_VAULT) — relative_to(ROOT)
+    # raises ValueError there, so fall back to the absolute path in messages.
+    try:
+        return path.relative_to(ROOT)
+    except ValueError:
+        return path
+
+
 def _load(path):
     if not path.exists():
-        raise StageError(f"file missing: {path.relative_to(ROOT)}")
+        raise StageError(f"file missing: {_rel(path)}")
     try:
         return json.loads(path.read_text("utf-8"))
     except Exception as e:
-        raise StageError(f"broken JSON {path.relative_to(ROOT)}: {e}")
+        raise StageError(f"broken JSON {_rel(path)}: {e}")
 
 
 def _need_keys(obj, keys, where):

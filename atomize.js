@@ -21,11 +21,15 @@ export const meta = {
 // via scriptPath from any cwd. ROOT is resolved from this file's own location,
 // overridable via RESEARCH_STACK_ROOT. DATA_ROOT honours the vault
 // (RESEARCH_VAULT) for topic data, falling back to the repo root.
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-const ROOT =
-  process.env.RESEARCH_STACK_ROOT || dirname(fileURLToPath(import.meta.url));
-const DATA_ROOT = process.env.RESEARCH_VAULT || ROOT;
+// NOTE: static `import ... from` is unavailable in the Workflow sandbox (the script
+// body is parsed as an async function body, where import statements are a syntax
+// error). Resolve roots from env when the runtime exposes `process`, with an
+// `args.dataRoot` override applied after args are parsed below.
+let __env = {};
+try {
+  __env = (typeof process !== "undefined" && process.env) || {};
+} catch {}
+let DATA_ROOT = __env.RESEARCH_VAULT || __env.RESEARCH_STACK_ROOT || "";
 
 // ─── Structured output schema (identical to ATOMIZE_SCHEMA in check_claims.js) ───
 const ATOMIZE_SCHEMA = {
@@ -79,6 +83,11 @@ if (typeof A === "string") {
   }
 }
 A = A || {};
+if (A.dataRoot) DATA_ROOT = A.dataRoot;
+if (!DATA_ROOT)
+  throw new Error(
+    "atomize: no data root — pass args.dataRoot (path to research vault) or set RESEARCH_VAULT",
+  );
 const topic = A.topic || "topic1";
 const engine = A.engine || "perplexity_sonar";
 log(`input: topic=${topic}, engine=${engine}`);

@@ -259,6 +259,18 @@ def main():
     confirmed, unconfirmed = split(verdicts)
     recovered = load_resourced(topic)          # live anchors from re-sourcing — merged BEFORE clustering
     confirmed_all = confirmed + recovered
+
+    # exclude.json (written by relevance_gate --apply) keys off-scope anchors by "engine:cid".
+    # Honour it here so off-scope facts actually leave the pool — previously the file was
+    # written but nothing consumed it, and excluded facts silently stayed in the report.
+    excl_path = P.topic_dir(topic) / "exclude.json"
+    if excl_path.exists():
+        excl = set(json.loads(excl_path.read_text("utf-8")).get("exclude", []))
+        if excl:
+            before = len(confirmed_all)
+            confirmed_all = [i for i in confirmed_all if claim_id(i) not in excl]
+            print(f"  excluded off-scope (exclude.json): {before - len(confirmed_all)}")
+
     sections = load_sections(topic)
 
     clusters = cluster(confirmed_all)
